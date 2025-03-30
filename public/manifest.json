@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "Interview Copilot",
+  "version": "1.0.0",
+  "description": "Interview Copilot",
+  "permissions": ["tabs", "storage", "windows", "system.display"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {}
+}

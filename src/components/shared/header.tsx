@@ -7,7 +7,7 @@ export default function Header() {
   const isSettingsPage = location.pathname === "/settings";
 
   const handleCloseClick = () => {
-    window.close(); // This will close the extension popup
+    window.close();
   };
 
   return (
@@ -21,21 +21,21 @@ export default function Header() {
         </span>
       </div>
       <Link
-        className="flex flex-row items-center p-6 border-l border-r group hover:bg-black"
+        className="flex flex-row items-center p-6 border-l border-r group hover:bg-primary"
         to={`${isSettingsPage ? "/" : "/settings"}`}
         draggable="false"
       >
         {isSettingsPage ? (
-          <ChevronLeftIcon className="w-6 h-6 group-hover:text-white" />
+          <ChevronLeftIcon className="w-6 h-6 group-hover:text-secondary" />
         ) : (
-          <SettingsIcon className="w-6 h-6 group-hover:text-white" />
+          <SettingsIcon className="w-6 h-6 group-hover:text-secondary" />
         )}
       </Link>
       <button
-        className="flex flex-row items-center p-6 cursor-pointer hover:bg-black group"
-        onClick={handleCloseClick} // Add the onClick handler
+        className="flex flex-row items-center p-6 cursor-pointer hover:bg-primary group"
+        onClick={handleCloseClick}
       >
-        <XIcon className="w-6 h-6 group-hover:text-white" />
+        <XIcon className="w-6 h-6 group-hover:text-secondary" />
       </button>
     </header>
   );

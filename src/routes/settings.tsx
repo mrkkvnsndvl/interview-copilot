@@ -18,14 +18,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Slider } from "@/components/ui/slider";
 import { createFileRoute } from "@tanstack/react-router";
+import { useTheme } from "@/components/shared/theme-provider";
 
 export const Route = createFileRoute("/settings")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
+  const { theme, setTheme } = useTheme();
+
   return (
     <>
       <section className="flex flex-row p-6 gap-x-3">
@@ -93,30 +95,35 @@ function RouteComponent() {
         </div>
       </section>
       <Separator />
-      <section className="flex flex-row items-center h-[66px] px-6 py-3">
+      <section className="flex flex-row items-center px-6 py-3">
         <h3 className="text-base font-medium text-nowrap">
           Personalize Settings
         </h3>
-        <Separator className="mx-2" orientation="vertical" />
-        <div className="flex flex-row w-full gap-x-3">
-          <div className="flex flex-row gap-x-1.5 flex-1/2 items-center">
-            <h4 className="text-sm font-medium">Transparency</h4>
-            <Slider
-              className="cursor-grab"
-              defaultValue={[0]}
-              max={100}
-              step={1}
-            />
-          </div>
+        <div className="flex flex-row justify-end w-full gap-x-3">
           <div className="flex flex-row border border-border">
-            <div className="flex flex-col p-2 bg-black cursor-pointer">
-              <MonitorIcon className="w-6 h-6 text-white" />
+            <div
+              className={`flex flex-col p-2 cursor-pointer ${
+                theme === "system" ? "bg-primary text-primary-foreground" : ""
+              }`}
+              onClick={() => setTheme("system")}
+            >
+              <MonitorIcon className="w-6 h-6" />
             </div>
-            <div className="flex flex-col p-2 bg-white cursor-pointer">
-              <SunIcon className="w-6 h-6 text-black" />
+            <div
+              className={`flex flex-col p-2 cursor-pointer ${
+                theme === "light" ? "bg-primary text-primary-foreground" : ""
+              }`}
+              onClick={() => setTheme("light")}
+            >
+              <SunIcon className="w-6 h-6" />
             </div>
-            <div className="flex flex-col p-2 bg-black cursor-pointer">
-              <MoonIcon className="w-6 h-6 text-white" />
+            <div
+              className={`flex flex-col p-2 cursor-pointer ${
+                theme === "dark" ? "bg-primary text-primary-foreground" : ""
+              }`}
+              onClick={() => setTheme("dark")}
+            >
+              <MoonIcon className="w-6 h-6" />
             </div>
           </div>
         </div>

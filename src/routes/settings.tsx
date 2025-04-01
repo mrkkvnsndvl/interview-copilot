@@ -20,6 +20,8 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { createFileRoute } from "@tanstack/react-router";
 import { useTheme } from "@/components/shared/theme-provider";
+import { useApiStore } from "@/hooks/useApiStore";
+import { aiModels } from "@/constants";
 
 export const Route = createFileRoute("/settings")({
   component: RouteComponent,
@@ -27,6 +29,14 @@ export const Route = createFileRoute("/settings")({
 
 function RouteComponent() {
   const { theme, setTheme } = useTheme();
+  const {
+    apiKey,
+    jobPosition,
+    selectedModel,
+    setApiKey,
+    setJobPosition,
+    setSelectedModel,
+  } = useApiStore();
 
   return (
     <>
@@ -34,6 +44,8 @@ function RouteComponent() {
         <div className="flex flex-col w-full gap-y-3">
           <h3 className="text-base font-medium">Job Position</h3>
           <Input
+            value={jobPosition}
+            onChange={(e) => setJobPosition(e.target.value)}
             className="px-3 py-6 placeholder:text-base"
             placeholder="Enter job position"
           />
@@ -48,18 +60,24 @@ function RouteComponent() {
               </span>
             </div>
           </div>
-          <Select>
+          <Select
+            value={selectedModel?.id}
+            onValueChange={(value) => {
+              const model = aiModels.find((m) => m.id === value);
+              setSelectedModel(model || null);
+            }}
+          >
             <SelectTrigger className="w-full px-3 py-6 cursor-pointer">
               <SelectValue placeholder="Select a model" />
             </SelectTrigger>
             <SelectContent className="h-54">
               <SelectGroup>
                 <SelectLabel>Models</SelectLabel>
-                <SelectItem value="apple">Apple</SelectItem>
-                <SelectItem value="banana">Banana</SelectItem>
-                <SelectItem value="blueberry">Blueberry</SelectItem>
-                <SelectItem value="grapes">Grapes</SelectItem>
-                <SelectItem value="pineapple">Pineapple</SelectItem>
+                {aiModels.map((model) => (
+                  <SelectItem key={model.id} value={model.id}>
+                    {model.name}
+                  </SelectItem>
+                ))}
               </SelectGroup>
             </SelectContent>
           </Select>
@@ -70,6 +88,9 @@ function RouteComponent() {
         <h3 className="text-base font-medium">API Key</h3>
         <div className="flex flex-row gap-x-3">
           <Input
+            value={apiKey}
+            onChange={(e) => setApiKey(e.target.value)}
+            type="password"
             className="px-3 py-6 placeholder:text-base"
             placeholder="Enter API key"
           />

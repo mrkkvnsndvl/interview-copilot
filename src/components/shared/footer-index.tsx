@@ -2,16 +2,28 @@ import { MicIcon, MicOffIcon, SendIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useSpeechRecognitionStore } from "@/hooks/useSpeechRecognitionStore";
+import { useApiStore } from "@/hooks/useApiStore";
 
 export default function FooterIndex() {
-  const { isListening, startListening, stopListening } =
+  const { isListening, startListening, stopListening, transcript } =
     useSpeechRecognitionStore();
+  const { generateAnswer } = useApiStore();
 
   const handleMicClick = () => {
     if (isListening) {
       stopListening();
     } else {
       startListening();
+    }
+  };
+
+  const handleGetAnswer = async () => {
+    if (!transcript) return;
+
+    try {
+      await generateAnswer(transcript);
+    } catch (error) {
+      console.error("Failed to generate answer:", error);
     }
   };
 
@@ -32,7 +44,12 @@ export default function FooterIndex() {
           </>
         )}
       </Button>
-      <Button className="p-6 cursor-pointer" variant="default">
+      <Button
+        className="p-6 cursor-pointer"
+        variant="default"
+        onClick={handleGetAnswer}
+        disabled={!transcript}
+      >
         <SendIcon className="w-6 h-6" /> Get answer
       </Button>
     </footer>

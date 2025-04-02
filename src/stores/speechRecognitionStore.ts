@@ -1,35 +1,17 @@
-import { questionWords } from "@/constants";
 import { Store } from "@tanstack/react-store";
+import { questionWords } from "@/constants";
 
 interface SpeechRecognitionState {
   transcript: string;
   isListening: boolean;
   error: string | null;
   isQuestion: boolean;
+  isSystemAudioEnabled: boolean;
 }
-
-const isQuestionString = (text: string): boolean => {
-  const lowercaseText = text.toLowerCase().trim();
-  if (lowercaseText.endsWith("?")) return true;
-
-  const words = lowercaseText.split(" ");
-  for (let i = 0; i < words.length; i++) {
-    if (questionWords.includes(words[i]) && i < words.length - 1) {
-      const nextWords = words.slice(i, i + 3).join(" ");
-      if (
-        nextWords.includes("you") ||
-        nextWords.includes("i") ||
-        nextWords.includes("the")
-      ) {
-        return true;
-      }
-    }
-  }
-  return false;
-};
 
 class SpeechRecognitionStore extends Store<SpeechRecognitionState> {
   private recognition: SpeechRecognition | null = null;
+  private audioContext: AudioContext | null = null;
 
   constructor() {
     super({
@@ -37,20 +19,59 @@ class SpeechRecognitionStore extends Store<SpeechRecognitionState> {
       isListening: false,
       error: null,
       isQuestion: false,
+      isSystemAudioEnabled: false,
     });
 
     if (typeof window !== "undefined") {
+      this.initializeSpeechRecognition();
+    }
+  }
+
+  private async initializeSpeechRecognition() {
+    try {
+      // Initialize Web Speech API
       const SpeechRecognition =
         window.SpeechRecognition || window.webkitSpeechRecognition;
       if (SpeechRecognition) {
         this.recognition = new SpeechRecognition();
         this.setupRecognition();
-      } else {
-        this.setState((state) => ({
-          ...state,
-          error: "Speech recognition not supported",
-        }));
       }
+
+      // Request system audio using getDisplayMedia
+      const displayStream = await navigator.mediaDevices.getDisplayMedia({
+        audio: true,
+        video: false,
+      });
+
+      // Get microphone stream
+      const micStream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+      });
+
+      // Set up audio context for mixing streams
+      this.audioContext = new AudioContext();
+      const destination = this.audioContext.createMediaStreamDestination();
+
+      // Mix system audio and microphone
+      const systemSource =
+        this.audioContext.createMediaStreamSource(displayStream);
+      const micSource = this.audioContext.createMediaStreamSource(micStream);
+
+      systemSource.connect(destination);
+      micSource.connect(destination);
+
+      this.setState((state) => ({
+        ...state,
+        isSystemAudioEnabled: true,
+        error: null,
+      }));
+    } catch (error) {
+      console.error("Error initializing audio capture:", error);
+      this.setState((state) => ({
+        ...state,
+        error: "Please share your system audio and grant microphone access",
+        isSystemAudioEnabled: false,
+      }));
     }
   }
 
@@ -61,68 +82,53 @@ class SpeechRecognitionStore extends Store<SpeechRecognitionState> {
     this.recognition.interimResults = true;
 
     this.recognition.onresult = (event: SpeechRecognitionEvent) => {
-      const currentTranscript = Array.from(event.results)
+      const transcript = Array.from(event.results)
         .map((result) => result[0].transcript)
-        .join(" ");
+        .join("");
 
       this.setState((state) => ({
         ...state,
-        transcript: currentTranscript,
-        isQuestion: isQuestionString(currentTranscript),
+        transcript,
+        isQuestion: this.isQuestionString(transcript),
       }));
     };
 
     this.recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       this.setState((state) => ({
         ...state,
-        error: event.error,
+        error: `Speech recognition error: ${event.error}`,
         isListening: false,
       }));
-    };
-
-    this.recognition.onend = () => {
-      const currentState = this.state;
-      if (currentState.isListening && this.recognition) {
-        try {
-          this.recognition.start();
-        } catch (err) {
-          this.setState((state) => ({
-            ...state,
-            error: "Failed to restart speech recognition",
-            isListening: false,
-          }));
-        }
-      }
     };
   }
 
-  startListening = () => {
-    if (!this.recognition) return;
+  private isQuestionString(text: string): boolean {
+    const lowercaseText = text.toLowerCase().trim();
+    return (
+      lowercaseText.endsWith("?") ||
+      questionWords.some((word) => lowercaseText.startsWith(word))
+    );
+  }
 
-    try {
+  startListening = () => {
+    if (this.recognition) {
       this.recognition.start();
       this.setState((state) => ({
         ...state,
-        error: null,
         isListening: true,
-      }));
-    } catch (err) {
-      this.setState((state) => ({
-        ...state,
-        error: "Error starting speech recognition",
-        isListening: false,
+        error: null,
       }));
     }
   };
 
   stopListening = () => {
-    if (!this.recognition) return;
-
-    this.recognition.stop();
-    this.setState((state) => ({
-      ...state,
-      isListening: false,
-    }));
+    if (this.recognition) {
+      this.recognition.stop();
+      this.setState((state) => ({
+        ...state,
+        isListening: false,
+      }));
+    }
   };
 }
 

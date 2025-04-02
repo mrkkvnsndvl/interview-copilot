@@ -1,6 +1,5 @@
 import { useStore } from "@tanstack/react-store";
-
-import { speechRecognitionStore } from "../stores/speechRecognitionStore";
+import { speechRecognitionStore } from "@/stores/speechRecognitionStore";
 
 export function useSpeechRecognitionStore() {
   const state = useStore(speechRecognitionStore);

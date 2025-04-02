@@ -1,17 +1,16 @@
 import { MessageCircleQuestionIcon } from "lucide-react";
-
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { useElevenLabsStore } from "@/hooks/useElevenLabsStore";
 import { createFileRoute } from "@tanstack/react-router";
 import { useApiStore } from "@/hooks/useApiStore";
+import { useSpeechRecognitionStore } from "@/hooks/useSpeechRecognitionStore";
 
 export const Route = createFileRoute("/")({
   component: Index,
 });
 
 function Index() {
-  const { transcript, isProcessing, error, isQuestion } = useElevenLabsStore();
+  const { transcript, error, isQuestion } = useSpeechRecognitionStore();
   const { answer, isLoading, error: apiError } = useApiStore();
 
   return (
@@ -32,10 +31,8 @@ function Index() {
           >
             {error
               ? error
-              : isProcessing
-                ? "Processing your speech..."
-                : transcript ||
-                  "Click the microphone button to start speaking..."}
+              : transcript ||
+                "Click the microphone button to start speaking..."}
           </p>
         </ScrollArea>
       </section>
@@ -44,9 +41,7 @@ function Index() {
         <h3 className="text-base font-medium">Copilot</h3>
         <ScrollArea className="flex flex-col overflow-hidden text-balance h-[215.14px]">
           <p className="pr-3 text-base text-muted-foreground">
-            {isProcessing ? (
-              "Processing your speech..."
-            ) : isLoading ? (
+            {isLoading ? (
               "Generating answer..."
             ) : apiError ? (
               <span className="text-red-500">{apiError}</span>

@@ -4,6 +4,7 @@ import { Store } from "@tanstack/react-store";
 interface ApiState {
   apiKey: string;
   jobPosition: string;
+  jobDescription: string;
   selectedModel: {
     name: string;
     id: string;
@@ -25,6 +26,7 @@ class ApiStore extends Store<ApiState> {
     super({
       apiKey: localStorage.getItem("openrouter_api_key") || "",
       jobPosition: localStorage.getItem("job_position") || "",
+      jobDescription: localStorage.getItem("job_description") || "",
       selectedModel: null,
       isLoading: false,
       error: null,
@@ -41,6 +43,11 @@ class ApiStore extends Store<ApiState> {
   setJobPosition = (jobPosition: string) => {
     localStorage.setItem("job_position", jobPosition);
     this.setState((state) => ({ ...state, jobPosition }));
+  };
+
+  setJobDescription = (jobDescription: string) => {
+    localStorage.setItem("job_description", jobDescription);
+    this.setState((state) => ({ ...state, jobDescription }));
   };
 
   setSelectedModel = (model: { name: string; id: string } | null) => {

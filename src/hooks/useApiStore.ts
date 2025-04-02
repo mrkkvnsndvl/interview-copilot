@@ -9,6 +9,7 @@ export function useApiStore() {
     ...state,
     setApiKey: apiStore.setApiKey,
     setJobPosition: apiStore.setJobPosition,
+    setJobDescription: apiStore.setJobDescription, // Add this
     setSelectedModel: apiStore.setSelectedModel,
     generateAnswer,
   };
